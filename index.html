@@ -1,0 +1,112 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <!--link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" type="text/css" href="./bower_components/bootstrap/dist/css/bootstrap.css" />
+
+    <link rel="stylesheet" href="styles/sidebar.css" />
+    <link rel="stylesheet" href="styles/auth.css" /-->
+    <!-- endbuild -->
+    <style>
+    #chat {
+      height:400px;
+    }
+    .msg {
+      color:grey;
+      font-style: italic;
+    }
+    .error{
+      color:red;
+    }
+    #contentwrap {
+      display: none;
+    }
+    #chatwrap {
+      float:left;
+      border: 1px #000 solid;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="nickwrap">
+      <p>Enter a username: </p>
+      <p id="nickerror"></p>
+      <form id="setnick">
+        <input type="text" id="nickname" />
+        <input type="submit" />
+      </form>
+    </div>
+
+    <div id="contentwrap">
+      <div id="chatwrap">
+        <div id="chat"></div>
+        <form id="sendmessage">
+          <input type="text" id="message" />
+          <input type="submit" />
+        </form>
+      </div>
+      <div id="users"></div>
+    </div>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script>
+      jQuery(function($){
+        var socket=io.connect();
+        var mform=$('#sendmessage');
+        var msg=$('#message');
+        var chat=$('#chat');
+        var nickname=$('#nickname');
+        var nickerror=$('#nickerror');
+        var nickform=$('#setnick');
+        var users=$("#users");
+
+        nickform.submit(function(e){
+          e.preventDefault();
+          socket.emit('newuser',nickname.val(),function(data){
+            if(data){
+              $("#nickwrap").hide();
+              $('#contentwrap').show();
+            }
+            else {
+              nickerror.html("this nickname is already taken");
+            }
+          });
+          nickname.val("");
+        })
+
+
+        socket.on("usernames",function(data){
+          var html="";
+          for(var i=0;i<data.length;i++){
+            html+=data[i]+'<br/>';
+          }
+          users.html(html);
+        });
+
+        mform.submit(function(e){
+          e.preventDefault();
+          socket.emit("sendmessage",msg.val(),function(data){
+            chat.append('<span class="error">'+data +'</span><br />' );
+          });
+          msg.val("");
+        })
+        socket.on('newmessage',function(data){
+          chat.append('<b>'+data.nickname+' : </b>' + data.msg + '<br />' );
+        });
+        socket.on("whisper",function(data){
+          chat.append('<span class="msg"><b>'+data.nickname+' : </b>' + data.msg + '</span><br />' );
+        })
+      });
+    </script>
+  </body>
+</html>
