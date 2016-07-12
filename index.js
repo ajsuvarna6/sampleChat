@@ -9,11 +9,11 @@ console.log("server running on http://localhost:3001/");
 
 app.get('/',function(req,res){
   res.sendFile(__dirname + '/index.html');
+  //res.json(io.sockets);
 });
 //app.use(express.static(__dirname + '/'));
 
 io.sockets.on('connection',function(socket){
-  //console.log(socket);
 
   socket.on('newuser',function(data,callback){
     if(data in users) {
@@ -23,6 +23,7 @@ io.sockets.on('connection',function(socket){
       socket.nickname=data;
       users[socket.nickname]=socket;
       updatenicknames();
+      //console.log(socket);
     }
   });
 
@@ -45,8 +46,10 @@ io.sockets.on('connection',function(socket){
         var name=message.substring(0,ind);
         var message=message.substring(ind+1);
         if(name in users) {
+
           users[name].emit('whisper',{msg:message,nickname: socket.nickname})
-            console.log("whisper");
+            //console.log("whisper",io.sockets);
+
         } else {
           callback('error enter valid user');
         }

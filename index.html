@@ -88,9 +88,14 @@
         socket.on("usernames",function(data){
           var html="";
           for(var i=0;i<data.length;i++){
-            html+=data[i]+'<br/>';
+            html+='<a href="#" class="user" id="'+data[i]+'">'+data[i]+'</a><br/>';
           }
           users.html(html);
+        });
+
+        $("#users").on("click","a.user",function(e){
+          e.preventDefault();
+          console.log(e.target.id);
         });
 
         mform.submit(function(e){
